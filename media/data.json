@@ -1,0 +1,19 @@
+{
+    'form_data': 
+        {
+            'customerName': 'CREATIVITY ANTHOL', 
+            'model': '2292333 Panel pattern Y1G', 
+            'supplier': 'Serenity', 
+            'jobOrder': '10001122', 
+            'partCode': '39000459', 
+            'mat': '', 
+            'color': '', 
+            'partName': '-', 
+            'matNo': '', 
+            'quantityStd': '1', 
+            'producer': '1066711101', 
+            'date': '2025-03-04'
+        }, 
+    'serial_number': 'B8MES|PR250304-MC07-0002',
+    'state': '1'
+}
