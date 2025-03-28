@@ -1,30 +1,38 @@
-from io import BytesIO
+import os
+import shutil
+import uuid
+from datetime import datetime
 
 import requests
-from PIL import Image
 
 
-def zpl_to_image(zpl_code, width=300, height=300, dpi=203):
-    url = "http://api.labelary.com/v1/printers/{dpi}dpi/labels/{width}x{height}/0/".format(
-        dpi=dpi, width=width, height=height
-    )
-
-    response = requests.post(url, data=zpl_code.encode("utf-8"), headers={"Accept": "image/png"})
+def zpl_to_image(zpl_code, width=4, height=6, dpmm=8):
+    folder_name = datetime.now().strftime("%Y-%m-%d")
+    folder_path = os.path.join("images", folder_name)
     
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+ 
+    file_name = f"{uuid.uuid4().hex}.png"  
+    file_path = os.path.join(folder_path, file_name)
+ 
+    url = f"http://api.labelary.com/v1/printers/{dpmm}dpmm/labels/{width}x{height}/0/"
+    files = {"file": zpl_code}
+    
+    response = requests.post(url, headers={"Accept": "image/png"}, files=files, stream=True)
+
     if response.status_code == 200:
-        image = Image.open(BytesIO(response.content))
-        return image
+        response.raw.decode_content = True
+        with open(file_path, "wb") as out_file:
+            shutil.copyfileobj(response.raw, out_file)
+        print(f"✅ บันทึกภาพสำเร็จ: {file_path}")
+        return file_path
     else:
-        print(f"เกิดข้อผิดพลาด: {response.status_code} - {response.text}")
+        print(f"❌ เกิดข้อผิดพลาด: {response.status_code} - {response.text}")
         return None
 
 if __name__ == "__main__":
-    with open("image.zpl", "r") as file:
-        zpl_code = file.read()
-
-    image = zpl_to_image(zpl_code)
-
-    if image:
-        image.show()  # แสดงภาพ
-        image.save("output.png")  # บันทึกเป็นไฟล์ PNG
-        print("บันทึกภาพเป็น 'output.png'")
+    zpl_code = "^XA^FO50,50^BQN,2,10^FDQA,Hello World!^FS^XZ"
+    image_path = zpl_to_image(zpl_code)
+    if image_path:
+        print(f"ไฟล์ที่บันทึก: {image_path}")
