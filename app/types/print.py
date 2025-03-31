@@ -3,6 +3,8 @@ from typing import TypedDict
 
 class TREQ_PostPrintLabel(TypedDict):
     tag_no: int
+    order_id: str
+    sap_no: str
     customer_name: str
     model: str
     supplier: str

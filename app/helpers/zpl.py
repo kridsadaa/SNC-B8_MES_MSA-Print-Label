@@ -9,54 +9,78 @@ from app.types import TREQ_PostPrintLabel
 from app.utils import convert_zpl_to_image, extract_number, find_part_code
 
 
+def move_along_lenh(content, default, multiplier):
+    move = default - (len(str(content)) * multiplier)
+    return move
+
+def move_according_to_conditions(content, conditions, default=0):
+    move = next((size for length, size in sorted(conditions.items()) if (len(str(content))) < length), default)
+    return move
+
+def font_size(text, conditions, default="25,25"):
+    font_size = next((size for length, size in sorted(conditions.items()) if len(text) < length), default)
+    return font_size
+
 def generate_zpl_labels(req: TREQ_PostPrintLabel):
     res = []
     folder_date = datetime.now().strftime("%Y-%m-%d")
     save_folder = os.path.join("temp", folder_date, "images", "labels")
-    
+        
     zpl_content = f"""
-    ^FO20,112^A0N,25,25^FDCustomer Name : {req['customer_name']}^FS
-    ^FO480,112^A0N,25,25^FDModel {req['model']}^FS
-    ^FO20,152^A0N,25,25^FDSupplier^FS
-    ^FO120,152^A0N,25,25^FD{req['supplier']}^FS
+    ^FO{move_along_lenh(req['tag_no'], 640, 30)},5^A0N,60,60^FD{req['tag_no']}^FS
     
-    ^FO20,205^A0N,30,30^FDPart^FS
-    ^FO20,235^A0N,30,30^FDCode^FS
-    ^FO20,205^A0N,30,30^FDPart^FS
+    ^FO10,72^A0N,25,25^FDCustomer Name : {req['customer_name']}^FS
+    ^FO480,72^A0N,25,25^FDModel {req['model']}^FS
+    ^FO10,112^A0N,25,25^FDSupplier^FS
+    ^FO110,112^A0N,25,25^FD{req['supplier']}^FS
 
-    ^FO370,195^A0N,23,23^FDMat'l^FS
-    ^FO370,245^A0N,23,23^FDColor^FS
+    ^FO10,152^A0N,25,25^FDOrder ID^FS
+    ^FO110,152^A0N,25,25^FD{req['order_id']}^FS
+    ^FO360,152^A0N,23,23^FDMat'l No^FS
+    ^FO460,152^A0N,25,25^FD{req['sap_no']}^FS
 
-    ^FO20,305^A0N,30,30^FDPart^FS
-    ^FO20,335^A0N,30,30^FDName^FS
+    ^FO10,205^A0N,30,30^FDPart^FS
+    ^FO10,235^A0N,30,30^FDCode^FS
+    ^FO110,{move_according_to_conditions(req['part_code'], {9: 210, 11: 213, 13: 215}, 210)}
+    ^A0N,{font_size(req['part_code'], {9: "60,60", 11: "50,50", 13: "40,40"})}
+    ^FD{req['part_code']}^FS
 
-    ^FO370,295^A0N,23,23^FDProducer^FS
-    ^FO370,345^A0N,23,23^FDDate^FS
+    ^FO360,195^A0N,23,23^FDMat'l^FS
+    ^FO460,195^A0N,25,25^FD{req['mat']}^FS
+    ^FO360,245^A0N,23,23^FDColor^FS
+    ^FO460,245^A0N,25,25^FD{req['color']}^FS
 
-    ^FO20,390^A0N,23,23^FDPicture of Part^FS
-    ^FO205,380^BQN,2,5,10^FDQA,{req['code']}^FS
+    ^FO10,305^A0N,30,30^FDPart^FS
+    ^FO10,335^A0N,30,30^FDName^FS
+    ^FO110,{move_according_to_conditions(req['part_name'], {10: 310, 12: 313, 14: 315, 16: 317, 18: 319}, 321)}
+    ^A0N,{font_size(req['part_name'], {10: "60,60", 12: "50,50", 14: "40,40", 16: "35,35", 18: "30,30"}, "25,25")}
+    ^FD{req['part_name']}^FS
 
-    ^FO370,390^A0N,23,23^FDQuantity (Unit)^FS
-    ^FO450,430^A0N,100,100^FD{req['quantity']}^FS
-    ^FO370,525^A0N,20,20^FDRoHS2^FS
-    ^FO585,525^A0N,20,20^FDPCS.^FS
+
+    ^FO360,295^A0N,23,23^FDProducer^FS
+    ^FO460,295^A0N,25,25^FD{req['producer']}^FS
+    ^FO360,345^A0N,23,23^FDDate^FS
+    ^FO460,345^A0N,25,25^FD{req['date']}^FS
+
+    ^FO10,390^A0N,23,23^FDPicture of Part^FS
+    ^FO205,370^BQN,2,5,10^FDQA,{req['code']}^FS
+
+    ^FO360,390^A0N,23,23^FDQuantity (Unit)^FS
+    ^FO440,420^A0N,100,100^FD{req['quantity']}^FS
+    ^FO360,505^A0N,20,20^FDRoHS2^FS
+    ^FO585,505^A0N,20,20^FDPCS.^FS
      """
     
     for i in range(req['number_of_tags']):
-        number_of_tags = f"^FO10,550^A0N,20,20^FD{req['code']} ({i + 1}/{req['number_of_tags']})^FS"
-        zpl_code = f"{head_zpl_640x550}{head_label_640x550}{logo_zpl}{tabel_zpl}{zpl_content}{number_of_tags}{footer_zpl}"
-        image_path = convert_zpl_to_image(zpl_code, 3.15, 2.8, 8, save_folder)
+        number_of_tags = f"^FO2,530^A0N,20,20^FD{req['code']} ({i + 1}/{req['number_of_tags']})^FS"
+        zpl_code = f"{head_zpl_640x550}{head_label_640x550}{tabel_zpl}{zpl_content}{number_of_tags}{footer_zpl}"
+        image_path = convert_zpl_to_image(zpl_code, 3.15, 2.7, 8, save_folder)
         res.append(image_path)
     
     return res
  
 head_zpl_640x550 = '^XA^PW640^LL550'
 footer_zpl = '^XZ'
-logo_zpl = '^FO10,0^GFA,1080,1080,12,,O01C1E,O07E1F8,O0FE3FC,N03FF3FF,N07FF3FF8,M01IF3FFE,M03IF3IF,M0JF3IFC,L01JF3IFE,L07JF3JF8,L0KF3JFC,K03KF3KF,K07KF3KF8,J01LF3KFE,J03LF3LF,J0MF3LFC,I01MF3LFE,I07MF3MF,I0NF3MFC,003NF3MFE,007NF3NF8,01OF3NFC,03OF3OF,07OF3OF,:03OF3OF,03OF3NFE,00OF3NFC,007NF3NF,001NF3MFE,060NF3MF838,0F83MF3MF07C,1FC1MF3LFC1FE,1FF07LF3LF87FE,1FF83LF3KFE0FFE,1FFE0LF3KFC3FFE,1IF07KF3KF07FFE,1IFC1KF3JFE1IFE,1IFE0KF3JF83IFE,1JF83JF3JF0JFE,1JFC1JF3IFC1JFE,1KF07IF3IF87JFE,1KF83IF3FFE0KFE,1KFE0IF3FFC3KFE,1LF07FF3FF07KFE,1LFC1FF3FE1LFC,0LFE0FE3F83LFC,07LF83E1F0MF,01LFC1C0C1LFE,00MFJ07LF8,003LF8I0MF,061LFE003LFC1,0F07LF007LF87C,1FC3LFC1LFE0FE,1FE0LFE1LFC3FE,1FF87KFE3LF07FE,1FFC1LF3KFE1FFE,1IF0LF3KF83FFE,1IF83KF3KF0IFE,1IFE1KF3JFC1IFE,1JF07JF3JF87IFE,1JFC3JF3IFE0JFE,1JFE0JF3IFC3JFC,0KF87IF3IF07JFC,07JFC1IF3FFE1KF,01KF0IF3FF83JFE,00KFC3FF3FF0KF8,003JFE1FF3FC1KF,001KF87E3F87JFC,I07JFC3E1E0KF8,I03KFJ03JFE,J0KF8I07JFC,J07JFE001KF,J01KF003JFE,K0KFC0KF8,K03JFE1KF,K01JFE3JFC,L07JF3JF8,L03JF3IFE,M0JF3IFC,M07IF3IF,M01IF3FFE,N0IF3FF8,N03FF3FF,N01FF3FC,O07E3F8,O03E1E,,:^FS'
-head_label_640x550 = f"{logo_zpl}^FO105,6^GB5,76,5^FS^FO120,10^A0N,50,50^FDMES B8^FS^FO120,60^A0N,25,25^FDManufacturing Execution System B8^FS"
-tabel_zpl = """"^FO10,100^GB620,2,2^FS^FO10,140^GB620,2,2^FS
-^FO10,180^GB620,2,2^FS^FO360,229^GB270,2,2^FS^FO10,280^GB620,2,2^FS
-^FO360,329^GB270,2,2^FS^FO10,380^GB620,2,2^FS^FO10,545^GB620,2,2^FS
-
-^FO10,102^GB2,444,2^FS^FO110,140^GB2,240,2^FS^FO360,180^GB2,364,2^FS^FO460,180^GB2,200,2^FS^FO628,102^GB2,444,2^FS
-"""
+logo_zpl_55x55 = '^FO5,0^GFA,385,385,7,,L06C,K01EF,K03EF8,K0FEFE,J01FEFF,J07FEFFC,J0FFEFFE,I03FFEIF8,I07FFEIFC,001IFEJF,003IFEJF8,00JFEJFE,01JFEKF,07JFEKFC,0KFEKFE,1KFELF,07JFEKFC,03JFEKF8,18JFEJFE3,1C7IFEJFCF,1F1IFEJF1F,1F8IFEIFE7F,1FE3FFEIF8FF,1FF1FFEIF3FF,1FFC7FEFFC7FF,1FFE3FEFF9IF,1IF8FEFE3IF,1IFC7EFCJF,0JF1EF1IFE,07IF8EE7IFC,11IFE00JF1,1CJF03IFE7,1E3IFC7IF8F,1F9IFEJF3F,1FC7FFEIFC7F,1FF3FFEIF9FF,1FF8FFEFFE3FF,1FFE7FEFFCIF,1IF1FEFF1IF,07FFCFEFE7FFC,03FFE3EF8IF8,00IF9EF3FFE,007FFC6C7FFC,001IF01IF,I0IF83FFE,I03FFC7FF8,I01FFEIF,J07FEFFC,J03FEFF8,K0FEFE,K07EFC,K01EF,L0EE,,^FS'
+head_label_640x550 = f"{logo_zpl_55x55}^FO65,0^GB5,50,5^FS^FO80,0^A0N,40,40^FDMES B8^FS^FO80,35^A0N,20,20^FDManufacturing Execution System B8^FS"
+tabel_zpl = '^FO0,60^GB638,2,2^FS^FO1,100^GB638,2,2^FS^FO1,140^GB638,2,2^FS^FO1,180^GB638,2,2^FS^FO350,229^GB288,2,2^FS^FO1,280^GB638,2,2^FS^FO350,329^GB288,2,2^FS^FO1,380^GB638,2,2^FS^FO1,525^GB638,2,2^FS^FO0,62^GB3,464,3^FS^FO100,100^GB3,280,3^FS^FO350,140^GB3,385,3^FS^FO450,140^GB3,240,3^FS^FO637,62^GB3,464,3^FS'
