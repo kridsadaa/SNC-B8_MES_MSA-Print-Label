@@ -83,7 +83,6 @@ def print_image(image_path, printer_name):
     except Exception as e:
         print(f"An error occurred while printing: {e}")
 
-
 def print_ascii_art():
     print("-------------------------------------------")
     print("#  ____  __ ___              _            #")
