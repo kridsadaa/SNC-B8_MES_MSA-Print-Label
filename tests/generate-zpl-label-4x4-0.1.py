@@ -1,7 +1,15 @@
-from .number import extract_number
-from .part import find_part_code
+import os
+import shutil
+import uuid
+from datetime import datetime
 
-def generate_zpl_label(data_request):
+import requests
+
+from app.types import TREQ_PostPrintLabel
+from app.utils import extract_number, find_part_code
+
+
+def generate_zpl_label(data_request: TREQ_PostPrintLabel):
     content = data_request.get('form_data', {})
     num = extract_number(data_request['serial_number'])
     num_move_x = 700 - (len(str(num)) * 12)
