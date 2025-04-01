@@ -2,13 +2,15 @@ import os
 from datetime import datetime
 
 import requests
+from dotenv import load_dotenv
 
 from app.helpers import generate_zpl_labels, validatePostPrintLabel
 from app.types import TREQ_PostPrintLabel
 from app.utils import (convert_image_to_zpl, download_image_url, image,
                        jsonifyError, jsonifySuccess, print_image, validate)
 
-DEFAULT_PRINTER = os.getenv("DEFAULT_PRINTER", "zebra_printer")  
+load_dotenv()
+DEFAULT_PRINTER = os.getenv("DEFAULT_PRINTER", "mahingsa_printer")  
 
 def print_hello_world():
     try:

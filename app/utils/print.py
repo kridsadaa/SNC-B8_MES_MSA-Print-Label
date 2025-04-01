@@ -83,6 +83,44 @@ def print_image(image_path, printer_name):
     except Exception as e:
         print(f"An error occurred while printing: {e}")
 
+def print_images(image_paths, printer_name):
+    """
+    Print multiple image files as a single job using CUPS on Linux systems.
+
+    Args:
+        image_paths (list): A list of image file paths to be printed.
+        printer_name (str): The name of the printer to use.
+    """
+    try:
+        # ตรวจสอบว่าไฟล์ทั้งหมดมีอยู่จริง
+        for image_path in image_paths:
+            if not os.path.exists(image_path):
+                raise FileNotFoundError(f"Image file '{image_path}' not found.")
+
+        # ตรวจสอบว่ามี printer หรือไม่
+        result = subprocess.run(['lpstat', '-p'], capture_output=True, text=True)
+        if result.returncode != 0:
+            raise ValueError("Failed to get list of printers")
+
+        available_printers = [
+            line.split()[1] for line in result.stdout.splitlines() if line.startswith('printer ')
+        ]
+
+        if printer_name not in available_printers:
+            raise ValueError(f"Printer '{printer_name}' not found in available printers: {available_printers}")
+
+        # สร้างคำสั่ง `lp` สำหรับพิมพ์หลายรูปใน Job เดียว
+        cmd = ['lp', '-d', printer_name, '-o', 'fit-to-page', '-o', 'media=A4'] + image_paths
+        print_result = subprocess.run(cmd, capture_output=True, text=True)
+
+        if print_result.returncode != 0:
+            raise ValueError(f"Printing failed: {print_result.stderr}")
+
+        print(f"Started printing {len(image_paths)} images on {printer_name} as a single job.")
+
+    except Exception as e:
+        print(f"An error occurred while printing: {e}")
+
 def print_ascii_art():
     print("-------------------------------------------")
     print("#  ____  __ ___              _            #")
