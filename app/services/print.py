@@ -3,15 +3,13 @@ from datetime import datetime
 from urllib.parse import urlparse
 
 import requests
-from dotenv import load_dotenv
 
+from app.constants.printer import PRINTER_PORT_LIST
 from app.helpers import generate_zpl_labels, validatePostPrintLabel
 from app.types import TREQ_PostPrintLabel
 from app.utils import (convert_image_to_zpl, download_image_url, image,
-                       jsonifyError, jsonifySuccess, print_image, validate)
+                       jsonifyError, jsonifySuccess, print_images, validate)
 
-load_dotenv()
-DEFAULT_PRINTER = os.getenv("DEFAULT_PRINTER", "mahingsa_printer")  
 
 def print_hello_world():
     try:
@@ -20,7 +18,7 @@ def print_hello_world():
         return jsonifyError(str(e))
 
 
-def print_label(req: TREQ_PostPrintLabel):
+def print_label(req: TREQ_PostPrintLabel, printer_port: int = 0):
     try:
         if not req:
             return jsonifyError("No request body received", [] ,400)
@@ -58,9 +56,8 @@ def print_label(req: TREQ_PostPrintLabel):
         if not label_images:
             return jsonifyError("Failed to generate ZPL labels", [], 400)
         
-        # if  len(label_images) > 0:
-        #     for image in label_images:
-        #         print_image(image, DEFAULT_PRINTER)
+        if  len(label_images) > 0:
+            print_images(label_images, PRINTER_PORT_LIST[printer_port])
  
         return jsonifySuccess(f"Print label {req.get("code", "?")} successfully", [req])
     except Exception as e:

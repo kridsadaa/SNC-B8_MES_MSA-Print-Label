@@ -1,4 +1,5 @@
 import os
+from datetime import datetime, timedelta
 
 from dotenv import load_dotenv
 from flask import Flask, jsonify, request
@@ -10,7 +11,6 @@ from config import Config
 
 load_dotenv()
 PORT = os.getenv("PORT", 5000)  
-DEFAULT_PRINTER = os.getenv("DEFAULT_PRINTER", "mahingsa_printer")  
 
 app = Flask(__name__)
 CORS(app)
@@ -18,14 +18,14 @@ CORS(app)
 def create_app():
     print_ascii_art()
     delete_folder('temp')
-    schedule_task(delete_folder, '00:00', 'temp') 
+    folder_date = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")    
+    folder = os.path.join("temp", folder_date)
+    schedule_task(delete_folder, '01:00', folder) 
        
     app = Flask(__name__)
     app.config.from_object(Config)
 
     app.register_blueprint(print_blueprint)
-
-    
     app.run(host='0.0.0.0', port=PORT, debug=True)
 
     return app

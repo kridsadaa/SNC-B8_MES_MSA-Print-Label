@@ -26,10 +26,10 @@ def convert_zpl_to_image(zpl_code, width=4, height=6, dpmm=8, save_folder='temp'
         response.raw.decode_content = True
         with open(file_path, "wb") as out_file:
             shutil.copyfileobj(response.raw, out_file)
-        print(f"✅ บันทึกภาพสำเร็จ: {file_path}")
+        print(f"✅ The image was successfully saved.: {file_path}")
         return file_path
     else:
-        print(f"❌ เกิดข้อผิดพลาด: {response.status_code} - {response.text}")
+        print(f"❌ An error occurred.: {response.status_code} - {response.text}")
         return None
 
 def convert_image_to_zpl(image_url, width=100, height=100, save_folder='temp'):
@@ -50,10 +50,10 @@ def convert_image_to_zpl(image_url, width=100, height=100, save_folder='temp'):
     if response.status_code == 200:
         with open(file_path, 'w') as output_file:
             output_file.write(response.text)
-        print(f"แปลงภาพเสร็จสิ้นและบันทึกเป็น ZPL ใน '{file_path}'")
+        print(f"✅ Image conversion is complete and saved as ZPL in '{file_path}'")
         return file_path
     else:
-        print(f"เกิดข้อผิดพลาด: {response.status_code} - {response.text}")
+        print(f"❌ An error occurred.: {response.status_code} - {response.text}")
         return None
     
 def modify_zpl_coordinates(file_path, x, y):

@@ -74,8 +74,7 @@ def generate_zpl_labels(req: TREQ_PostPrintLabel):
      """
     
     zpl_part_image = modify_zpl_coordinates(req['zpl_part'], 10, 410)
-    print(f"zpl_part_image: {zpl_part_image}")
-    
+     
     for i in range(req['number_of_tags']):
         number_of_tags = f"^FO2,530^A0N,20,20^FD{req['code']} ({i + 1}/{req['number_of_tags']})^FS"
         zpl_code = f"{head_zpl_640x550}{head_label_640x550}{tabel_zpl}{zpl_content}{zpl_part_image}{number_of_tags}{footer_zpl}"

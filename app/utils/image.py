@@ -31,7 +31,6 @@ def download_image_url(image_url, save_folder='temp'):
     with open(image_path, 'wb') as handler:
         handler.write(img_data)
     
-    print(f'Image saved at: {image_path}')
     return image_path
 
 def resize_image(image_path, max_width, max_height):

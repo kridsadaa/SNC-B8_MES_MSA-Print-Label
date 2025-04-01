@@ -13,10 +13,20 @@ example of the required environment variables:
 
 ```
 # Printer configuration
-DEFAULT_PRINTER='Printer_POS-80'
+DEFAULT_PRINTER=''
+PRINTER_PORT1=''
+PRINTER_PORT2=''
+PRINTER_PORT3=''
+PRINTER_PORT4=''
+PRINTER_PORT5=''
+PRINTER_PORT6=''
+PRINTER_PORT7=''
+PRINTER_PORT8=''
+PRINTER_PORT9=''
+PRINTER_PORT10=''
 
 # Application port
-PORT=8000
+PORT=
 ```
 
 ## How to Use

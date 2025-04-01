@@ -9,23 +9,11 @@ print_blueprint = Blueprint("print", __name__)
 def get_print_test():
     return print_hello_world()
     
-@print_blueprint.route('/print', methods=['POST'])
-def post_print_label():
+@print_blueprint.route('/print', defaults={'id': 0}, methods=['POST'])
+@print_blueprint.route('/print/<int:id>', methods=['POST'])
+def post_print_label(id):
     if request.content_type != 'application/json':
         return jsonifyContentType()
     req = request.json or {}
         
-    return print_label(req)
-
-# @print_blueprint.route('/print/<int:id>', methods=['POST'])
-# def post_print_label(id):
-#     if request.content_type != 'application/json':
-#         return jsonify({"error": "Invalid Content-Type"}), 400
-
-#     req = request.json or {}
-
-#     return jsonify({
-#         "message": "Print request received",
-#         "id": id,
-#         "request_data": req
-#     })
+    return print_label(req, int(id))
