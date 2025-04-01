@@ -1,5 +1,6 @@
 import mimetypes
 import os
+import uuid
 from urllib.parse import urlsplit
 
 import requests
@@ -7,10 +8,14 @@ from PIL import Image
 
 
 def download_image_url(image_url, save_folder='temp'):
-    img_data = requests.get(image_url).content
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+    }
+    img_data = requests.get(image_url, headers=headers).content
     
     path = urlsplit(image_url).path
     file_extension = mimetypes.guess_type(path)[0]
+    
     
     if file_extension is None:
         file_extension = '.png'
@@ -20,7 +25,7 @@ def download_image_url(image_url, save_folder='temp'):
     if not os.path.exists(save_folder):
         os.makedirs(save_folder)
     
-    image_name = 'image_name' + file_extension
+    image_name = f"{uuid.uuid4().hex}{file_extension}"  
     image_path = os.path.join(save_folder, image_name)
     
     with open(image_path, 'wb') as handler:

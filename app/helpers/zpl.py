@@ -6,7 +6,8 @@ from datetime import datetime
 import requests
 
 from app.types import TREQ_PostPrintLabel
-from app.utils import convert_zpl_to_image, extract_number, find_part_code
+from app.utils import (convert_zpl_to_image, extract_number, find_part_code,
+                       modify_zpl_coordinates)
 
 
 def move_along_lenh(content, default, multiplier):
@@ -23,6 +24,7 @@ def font_size(text, conditions, default="25,25"):
 
 def generate_zpl_labels(req: TREQ_PostPrintLabel):
     res = []
+    zpl_part_image = ""
     folder_date = datetime.now().strftime("%Y-%m-%d")
     save_folder = os.path.join("temp", folder_date, "images", "labels")
         
@@ -71,9 +73,12 @@ def generate_zpl_labels(req: TREQ_PostPrintLabel):
     ^FO585,505^A0N,20,20^FDPCS.^FS
      """
     
+    zpl_part_image = modify_zpl_coordinates(req['zpl_part'], 10, 410)
+    print(f"zpl_part_image: {zpl_part_image}")
+    
     for i in range(req['number_of_tags']):
         number_of_tags = f"^FO2,530^A0N,20,20^FD{req['code']} ({i + 1}/{req['number_of_tags']})^FS"
-        zpl_code = f"{head_zpl_640x550}{head_label_640x550}{tabel_zpl}{zpl_content}{number_of_tags}{footer_zpl}"
+        zpl_code = f"{head_zpl_640x550}{head_label_640x550}{tabel_zpl}{zpl_content}{zpl_part_image}{number_of_tags}{footer_zpl}"
         image_path = convert_zpl_to_image(zpl_code, 3.15, 2.7, 8, save_folder)
         res.append(image_path)
     

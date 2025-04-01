@@ -1,4 +1,5 @@
 import os
+import re
 import shutil
 import uuid
 from datetime import datetime
@@ -31,8 +32,8 @@ def convert_zpl_to_image(zpl_code, width=4, height=6, dpmm=8, save_folder='temp'
         print(f"❌ เกิดข้อผิดพลาด: {response.status_code} - {response.text}")
         return None
 
-def convert_image_to_zpl(file_path, width=100, height=100, save_folder='temp'):
-    resized_image = resize_image(file_path, width, height)
+def convert_image_to_zpl(image_url, width=100, height=100, save_folder='temp'):
+    resized_image = resize_image(image_url, width, height)
 
     img_byte_arr = BytesIO()
     resized_image.save(img_byte_arr, format='PNG')
@@ -43,19 +44,37 @@ def convert_image_to_zpl(file_path, width=100, height=100, save_folder='temp'):
     if not os.path.exists(save_folder):
         os.makedirs(save_folder)
         
-    output_file_name = f"{uuid.uuid4().hex}.zpl"
-    output_file_path = os.path.join(save_folder, output_file_name)
+    file_name = f"{uuid.uuid4().hex}.zpl"
+    file_path = os.path.join(save_folder, file_name)
     
     if response.status_code == 200:
-        with open(output_file_path, 'w') as output_file:
+        with open(file_path, 'w') as output_file:
             output_file.write(response.text)
-        print(f"แปลงภาพเสร็จสิ้นและบันทึกเป็น ZPL ใน '{output_file_path}'")
+        print(f"แปลงภาพเสร็จสิ้นและบันทึกเป็น ZPL ใน '{file_path}'")
+        return file_path
     else:
         print(f"เกิดข้อผิดพลาด: {response.status_code} - {response.text}")
+        return None
+    
+def modify_zpl_coordinates(file_path, x, y):
+    try:
+        zpl_data = read_zpl_file(file_path)
+        
+        print(f"Reading ZPL file: {file_path}")
+        zpl_data = re.sub(r'^\^XA', '', zpl_data, flags=re.MULTILINE)
+        zpl_data = re.sub(r'\^XZ$', '', zpl_data, flags=re.MULTILINE)
+
+        zpl_data = re.sub(r'\^FO0,0', f'^FO{x},{y}', zpl_data)
+
+        return zpl_data
+
+    except Exception as e:
+        print(f"Error occurred: {e}")
+        return ''
     
 def read_zpl_file(file_path):
     try:
-        with open(file_path, 'r') as file:  # Changed from 'r+' to 'r'
+        with open(file_path, 'r') as file: 
             return file.read()
     except Exception as e:
         print(f"An error occurred while reading the ZPL file: {e}")
