@@ -47,7 +47,7 @@ This project requires a `.env` file to configure essential settings.
 
 ```
 # Printer Configuration
-DEFAULT_PRINTER=""
+DEFAULT_PRINTER="Printer_POS-80"
 PRINTER_PORT1=""
 PRINTER_PORT2=""
 PRINTER_PORT3=""
@@ -60,7 +60,7 @@ PRINTER_PORT9=""
 PRINTER_PORT10=""
 
 # Application Port
-PORT=
+PORT=8000
 ```
 
 Ensure that the `.env` file is properly loaded in your application using

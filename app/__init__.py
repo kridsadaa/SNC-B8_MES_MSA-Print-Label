@@ -1,3 +1,4 @@
+import argparse
 import os
 from datetime import datetime, timedelta
 
@@ -14,6 +15,11 @@ PORT = os.getenv("PORT", 5000)
 
 app = Flask(__name__)
 CORS(app)
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--port", type=int, default=int(os.getenv("PORT", 5000)), help="Port to run the Flask app")
+args = parser.parse_args()
+PORT = args.port 
 
 def create_app():
     print_ascii_art()
