@@ -124,6 +124,84 @@ project/
 ├── run.py
 ```
 
+## Setting up the Application to Run on Boot
+
+You can set up your Flask app to automatically run when your system starts using
+either `systemd` or `cron`.
+
+#### Option 1: Using `systemd`
+
+1. **Create a new `systemd` service file:**
+
+   1. Open a terminal and create a new service file in `/etc/systemd/system/`:
+
+   ```bash
+   sudo nano /etc/systemd/system/my-flask-app.service
+   ```
+
+   2. Add the following content to the file:
+
+   ```ini
+   [Unit]
+   Description=My Flask App
+   After=network.target
+   ```
+
+   ```
+   [Service]
+   ExecStart=/usr/bin/python3 /path/to/your/run.py
+   WorkingDirectory=/path/to/your/project
+   StandardOutput=inherit
+   StandardError=inherit
+   Restart=always
+   User=your-username
+   Group=your-username
+
+   [Install]
+   WantedBy=multi-user.target
+   Replace /path/to/your/run.py and /path/to/your/project with the actual paths to your run.py file and project directory. Also, replace your-username with your Ubuntu username.
+   ```
+
+   3. Reload systemd, enable the service, and start it:
+
+   ```bash
+   sudo systemctl daemon-reload
+   sudo systemctl enable my-flask-app.service
+   sudo systemctl start my-flask-app.service
+   ```
+
+   4. Check the status of the service:
+
+   ```bash
+   sudo systemctl status my-flask-app.service
+   ```
+
+#### Option 2: Using `cron`
+
+1.  Open the crontab editor
+
+```bash
+crontab -e
+```
+
+2.  Add the following line to run the app on reboot:
+
+```bash
+@reboot /usr/bin/python3 /path/to/your/run.py
+```
+
+3.  Save and exit the editor (Ctrl + X, then Y and Enter).
+
+### Notes
+
+```
+Make sure to update /path/to/your/run.py with the correct path to your run.py file.
+
+Ensure that the create_app() function in your app module is configured correctly for production use.
+
+If using systemd, ensure that systemd is installed and running on your Ubuntu system.
+```
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
