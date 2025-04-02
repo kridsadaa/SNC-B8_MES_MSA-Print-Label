@@ -59,6 +59,6 @@ def print_label(req: TREQ_PostPrintLabel, printer_port: int = 0):
         if  len(label_images) > 0:
             print_images(label_images, PRINTER_PORT_LIST[printer_port])
  
-        return jsonifySuccess(f"Print label {req.get("code", "?")} successfully", [req])
+        return jsonifySuccess(f"Print label {req['code']} successfully", [req])
     except Exception as e:
         return jsonifyError(str(e))
