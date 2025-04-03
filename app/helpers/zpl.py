@@ -55,7 +55,7 @@ def generate_zpl_labels(req: TREQ_PostPrintLabel):
     ^FO10,305^A0N,30,30^FDPart^FS
     ^FO10,335^A0N,30,30^FDName^FS
     ^FO110,{move_according_to_conditions(req['part_name'], {10: 310, 12: 313, 14: 315, 16: 317, 18: 319}, 321)}
-    ^A0N,{font_size(req['part_name'], {10: "60,60", 12: "50,50", 14: "40,40", 16: "35,35", 18: "30,30"}, "25,25")}
+    ^A0N,{font_size(req['part_name'], {9: "60,60", 11: "50,50", 13: "40,40", 15: "35,35", 17: "30,30"}, "25,25")}
     ^FD{req['part_name']}^FS
 
 
