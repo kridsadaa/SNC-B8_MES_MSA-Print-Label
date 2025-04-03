@@ -127,56 +127,67 @@ project/
 ## Setting up the Application to Run on Boot
 
 You can set up your Flask app to automatically run when your system starts using
-either `systemd` or `cron`.
+either `systemd` .
 
-#### Option 1: Using `systemd`
+ <!-- or `cron`. -->
 
-1. **Create a new `systemd` service file:**
+<!-- #### Option 1: Using `systemd` -->
 
-   1. Open a terminal and create a new service file in `/etc/systemd/system/`:
+#### Using `systemd`
 
-   ```bash
-   sudo nano /etc/systemd/system/my-flask-app.service
-   ```
+**Create a new `systemd` service file:**
 
-   2. Add the following content to the file:
+1.  Open a terminal and create a new service file in `/etc/systemd/system/`:
 
-   ```ini
-   [Unit]
-   Description=My Flask App
-   After=network.target
-   ```
+```bash
+sudo nano /etc/systemd/system/msa-mes-b8-printer-script.service
+```
 
-   ```
-   [Service]
-   ExecStart=/usr/bin/python3 /path/to/your/run.py
-   WorkingDirectory=/path/to/your/project
-   StandardOutput=inherit
-   StandardError=inherit
-   Restart=always
-   User=your-username
-   Group=your-username
+2.  Add the following content to the file:
 
-   [Install]
-   WantedBy=multi-user.target
-   Replace /path/to/your/run.py and /path/to/your/project with the actual paths to your run.py file and project directory. Also, replace your-username with your Ubuntu username.
-   ```
+```ini
+[Unit]
+Description=MSA MES B8 Printer Script
+After=network.target
 
-   3. Reload systemd, enable the service, and start it:
+[Service]
+WorkingDirectory=/home/username/.script/SNC-B8_MES_MSA-Print-Label
+ExecStart=/home/username/.script/SNC-B8_MES_MSA-Print-Label/venv/bin/python run.py
+Restart=always
+User=username
 
-   ```bash
-   sudo systemctl daemon-reload
-   sudo systemctl enable my-flask-app.service
-   sudo systemctl start my-flask-app.service
-   ```
+[Install]
+WantedBy=multi-user.target
+```
 
-   4. Check the status of the service:
+3.  Reload systemd, enable the service, and start it:
 
-   ```bash
-   sudo systemctl status my-flask-app.service
-   ```
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable msa-mes-b8-printer-script
+sudo systemctl start msa-mes-b8-printer-script
+```
 
-#### Option 2: Using `cron`
+4.  Check the status of the service:
+
+```bash
+systemctl status msa-mes-b8-printer-script
+```
+
+5.  To reload and restart the service:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart msa-mes-b8-printer-script
+```
+
+6.  View service log:
+
+```bash
+journalctl -u msa-mes-b8-printer-script.service -b
+```
+
+<!-- #### Option 2: Using `cron`
 
 1.  Open the crontab editor
 
@@ -190,7 +201,7 @@ crontab -e
 @reboot /usr/bin/python3 /path/to/your/run.py
 ```
 
-3.  Save and exit the editor (Ctrl + X, then Y and Enter).
+3.  Save and exit the editor (Ctrl + X, then Y and Enter). -->
 
 ### Notes
 
@@ -215,3 +226,7 @@ report issues in the repository.
 
 This version improves readability, structure, and formatting while maintaining
 clarity and completeness. Let me know if you need any more refinements!
+
+<!-- ---
+
+sudo apt update sudo apt install python3-dotenv -->
