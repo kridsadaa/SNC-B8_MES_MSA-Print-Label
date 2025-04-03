@@ -231,3 +231,17 @@ clarity and completeness. Let me know if you need any more refinements!
 <!-- ---
 
 sudo apt update sudo apt install python3-dotenv -->
+<!--  -->
+<!--
+sodu apt install python3-pip
+sodu apt install python3.12-venv
+
+python3 -m venv venv
+source venv/bin/activate
+pip install python-dotenv
+pip install flask
+pip install flask_apscheduler
+pip install flask_cors
+pip install requests
+pip install Pillow
+-->
