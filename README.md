@@ -205,13 +205,14 @@ crontab -e
 
 ### Notes
 
-```
-Make sure to update /path/to/your/run.py with the correct path to your run.py file.
+Make sure to update /path/to/your/run.py with the correct path to your run.py
+file.
 
-Ensure that the create_app() function in your app module is configured correctly for production use.
+Ensure that the create_app() function in your app module is configured correctly
+for production use.
 
-If using systemd, ensure that systemd is installed and running on your Ubuntu system.
-```
+If using systemd, ensure that systemd is installed and running on your Ubuntu
+system.
 
 ## License
 
