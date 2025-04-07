@@ -22,6 +22,8 @@ def print_label(req: TREQ_PostPrintLabel, printer_port: int = 0):
     try:
         if not req:
             return jsonifyError("No request body received", [] ,400)
+        if (req['model'] == 'A'):
+            return jsonifySuccess(f"Print label {req['code']} successfully", [req])
         
         zpl_part = ""
         label_images = []

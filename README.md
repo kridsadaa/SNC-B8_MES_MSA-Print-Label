@@ -233,8 +233,8 @@ clarity and completeness. Let me know if you need any more refinements!
 sudo apt update sudo apt install python3-dotenv -->
 <!--  -->
 <!--
-sodu apt install python3-pip
-sodu apt install python3.12-venv
+sudo apt install python3-pip
+sudo apt install python3.12-venv
 
 python3 -m venv venv
 source venv/bin/activate
