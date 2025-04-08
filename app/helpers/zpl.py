@@ -1,3 +1,4 @@
+import difflib
 import os
 import re
 import shutil
@@ -8,7 +9,7 @@ import requests
 
 from app.types import TREQ_PostPrintLabel
 from app.utils import (convert_zpl_to_image, extract_number, find_part_code,
-                       modify_zpl_coordinates)
+                       modify_zpl_coordinates, part)
 
 
 def _increment_last_number(code: str) -> str:
@@ -60,25 +61,39 @@ def generate_zpl_labels(req: TREQ_PostPrintLabel):
     folder_date = datetime.now().strftime("%Y-%m-%d")
     save_folder = os.path.join("temp", folder_date, "images", "labels")
         
-    if (req['model'] == "B"):
+    if (req['part_name'] == "Insulator A"):
+        part_code = [
+            {"a": "2PD06236/2-1D", "b": "2PD06237/2-1D", 'mat_no': '49001923, 49001922', 'order': f'{_increment_last_number(req['order_id'])}, {req['order_id']}' }, 
+            {"a": "2PD06236/1-1D", "b": "2PD06237/1-1D", 'mat_no': '49001922, 49001923', 'order': f'{req['order_id']}, {increment_last_number(req['order_id'])}' },
+            {"a": "2PD04461/1-1", "b": "2PD04462/1-1", 'mat_no': '49001928, 49001929', 'order': f'{req['order_id']}, {increment_last_number(req['order_id'])}' },
+            {"a": "2P495491-1/1", "b": "2P495492-1/1", 'mat_no': '', 'order': f'{req['order_id']}, {increment_last_number(req['order_id'])}' },
+            {"a": "2PD03599/1-1", "b": "2PD03599/1-1", 'mat_no': '49001930', 'order': f'{req['order_id']}, {increment_last_number(req['order_id'])}'}
+        ]
+        
+        a_codes = [item["a"] for item in part_code]
+
+        closest_match = difflib.get_close_matches(req['part_code'], a_codes, n=1, cutoff=0.5)
+
+        dataPartAB = next((item for item in part_code if item['a'] == closest_match[0]), None) if closest_match else None
+
         zpl_content = f"""
     ^FO{move_along_lenh(req['tag_no'], 640, 30)},5^A0N,60,60^FD{req['tag_no']}^FS
     
     ^FO10,72^A0N,25,25^FDCustomer Name : {req['customer_name']}^FS
-    ^FO480,72^A0N,25,25^FDModel A, {req['model']}^FS
+    ^FO480,72^A0N,25,25^FDModel {req['model']}^FS
     ^FO10,112^A0N,25,25^FDSupplier^FS
     ^FO110,112^A0N,25,25^FD{req['supplier']}^FS
 
     ^FO10,152^A0N,23,23^FDOrder ID^FS
-    ^FO110,152^A0N,21,21^FD{increment_last_number(req['order_id'])}, {req['order_id']}^FS
+    ^FO110,152^A0N,21,21^FD{dataPartAB['order']}^FS
     ^FO360,152^A0N,23,23^FDMat'l No^FS
-    ^FO460,152^A0N,21,21^FD{increment_last_number(req['sap_no'])}, {req['sap_no']}^FS
+    ^FO460,152^A0N,21,21^FD{dataPartAB['mat_no']}^FS
 
     ^FO10,195^A0N,20,20^FDPart Code^FS
-    ^FO200,195^A0N,20,20^FD{increment_last_number(req['part_code'])}^FS
+    ^FO200,195^A0N,20,20^FD{dataPartAB['a']}^FS
     ^FO10,245^A0N,20,20^FDPart Name^FS
-    ^FO200,245^A0N,20,20^FD{remove_last_digit(req['part_name'])}A^FS
-    ^FO105,177^BQN,2,3,10^FDQA,{increment_last_number(req['code'])}^FS
+    ^FO200,245^A0N,20,20^FDInsulator A^FS
+    ^FO105,177^BQN,2,3,10^FDQA,{req['code']}^FS
 
     ^FO360,195^A0N,23,23^FDMat'l^FS
     ^FO460,195^A0N,25,25^FD{req['mat']}^FS
@@ -86,10 +101,10 @@ def generate_zpl_labels(req: TREQ_PostPrintLabel):
     ^FO460,245^A0N,25,25^FD{req['color']}^FS
 
     ^FO10,295^A0N,20,20^FDPart Code^FS
-    ^FO110,295^A0N,20,20^FD{req['part_code']}^FS
+    ^FO110,295^A0N,20,20^FD{dataPartAB['b']}^FS
     ^FO10,345^A0N,20,20^FDPart Name^FS
-    ^FO110,345^A0N,20,20^FD{req['part_name']}^FS
-    ^FO260,277^BQN,2,3,10^FDQA,{req['code']}^FS
+    ^FO110,345^A0N,20,20^FDInsulator B^FS
+    ^FO260,277^BQN,2,3,10^FDQA,{increment_last_number(req['code'])}^FS
     
     ^FO360,295^A0N,23,23^FDProducer^FS
     ^FO460,295^A0N,25,25^FD{req['producer']}^FS
@@ -154,7 +169,7 @@ def generate_zpl_labels(req: TREQ_PostPrintLabel):
      
     for i in range(req['number_of_tags']):
         number_of_tags = f"^FO2,530^A0N,20,20^FD{req['code']} ({i + 1}/{req['number_of_tags']})^FS"
-        if (req['model'] == "B"):
+        if (req['part_name'] == "Insulator A"):
             zpl_code = f"{head_zpl_640x550}{head_label_640x550}{tabel_zpl_2_part}{zpl_content}{zpl_part_image}{number_of_tags}{footer_zpl}"
             image_path = convert_zpl_to_image(zpl_code, 3.15, 2.7, 8, save_folder)
             res.append(image_path)
