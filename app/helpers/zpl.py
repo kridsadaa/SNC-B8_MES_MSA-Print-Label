@@ -86,7 +86,7 @@ def generate_zpl_labels(req: TREQ_PostPrintLabel):
 
     ^FO10,152^A0N,23,23^FDOrder ID^FS
     ^FO110,152^A0N,21,21^FD{dataPartAB['order']}^FS
-    ^FO360,152^A0N,23,23^FDMat'l No^FS
+    ^FO360,152^A0N,23,23^FDSAP No^FS
     ^FO460,152^A0N,21,21^FD{dataPartAB['mat_no']}^FS
 
     ^FO10,195^A0N,20,20^FDPart Code^FS
@@ -136,7 +136,7 @@ def generate_zpl_labels(req: TREQ_PostPrintLabel):
 
     ^FO10,152^A0N,25,25^FDOrder ID^FS
     ^FO110,152^A0N,25,25^FD{req['order_id']}^FS
-    ^FO360,152^A0N,23,23^FDMat'l No^FS
+    ^FO360,152^A0N,23,23^FDSAP No^FS
     ^FO460,152^A0N,25,25^FD{req['sap_no']}^FS
 
     ^FO10,205^A0N,30,30^FDPart^FS
@@ -174,13 +174,15 @@ def generate_zpl_labels(req: TREQ_PostPrintLabel):
     zpl_part_image = modify_zpl_coordinates(req['zpl_part'], 10, 410)
      
     for i in range(req['number_of_tags']):
-        number_of_tags = f"^FO2,530^A0N,20,20^FD{req['code']} ({i + 1}/{req['number_of_tags']})^FS"
+        number_of_tags = f"^FO2,532^A0N,15,15^FD{req['code']} ({i + 1}/{req['number_of_tags']})^FS"
+        revision = f"^FO250,532^A0N,15,15^FDF-PRO-001 LABEL MES | Effective Date 03-05-2568 Rev.0^FS"
+
         if (req['part_name'] == "Insulator A"):
-            zpl_code = f"{head_zpl_640x550}{head_label_640x550}{tabel_zpl_2_part}{zpl_content}{zpl_part_image}{number_of_tags}{footer_zpl}"
+            zpl_code = f"{head_zpl_640x550}{head_label_640x550}{tabel_zpl_2_part}{zpl_content}{zpl_part_image}{number_of_tags}{revision}{footer_zpl}"
             image_path = convert_zpl_to_image(zpl_code, 3.15, 2.7, 8, save_folder)
             res.append(image_path)
         else:
-            zpl_code = f"{head_zpl_640x550}{head_label_640x550}{tabel_zpl}{zpl_content}{zpl_part_image}{number_of_tags}{footer_zpl}"
+            zpl_code = f"{head_zpl_640x550}{head_label_640x550}{tabel_zpl}{zpl_content}{zpl_part_image}{number_of_tags}{revision}{footer_zpl}"
             image_path = convert_zpl_to_image(zpl_code, 3.15, 2.7, 8, save_folder)
             res.append(image_path)
         
