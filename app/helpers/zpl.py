@@ -175,7 +175,6 @@ def generate_zpl_labels(req: TREQ_PostPrintLabel):
      
     for i in range(req['number_of_tags']):
         number_of_tags = f"^FO2,532^A0N,15,15^FD{req['code']} ({i + 1}/{req['number_of_tags']})^FS"
-        revision = f"^FO250,532^A0N,15,15^FDF-PRO-001 LABEL MES | Effective Date 03-05-2568 Rev.0^FS"
 
         if (req['part_name'] == "Insulator A"):
             zpl_code = f"{head_zpl_640x550}{head_label_640x550}{tabel_zpl_2_part}{zpl_content}{zpl_part_image}{number_of_tags}{revision}{footer_zpl}"
@@ -189,6 +188,7 @@ def generate_zpl_labels(req: TREQ_PostPrintLabel):
     return res
  
 head_zpl_640x550 = '^XA^PW640^LL550'
+revision = '^FO250,532^A0N,15,15^FDF-PRO-001 LABEL MES | Effective Date 03-05-2568 Rev.0^FS'
 footer_zpl = '^XZ'
 logo_zpl_55x55 = '^FO5,0^GFA,385,385,7,,L06C,K01EF,K03EF8,K0FEFE,J01FEFF,J07FEFFC,J0FFEFFE,I03FFEIF8,I07FFEIFC,001IFEJF,003IFEJF8,00JFEJFE,01JFEKF,07JFEKFC,0KFEKFE,1KFELF,07JFEKFC,03JFEKF8,18JFEJFE3,1C7IFEJFCF,1F1IFEJF1F,1F8IFEIFE7F,1FE3FFEIF8FF,1FF1FFEIF3FF,1FFC7FEFFC7FF,1FFE3FEFF9IF,1IF8FEFE3IF,1IFC7EFCJF,0JF1EF1IFE,07IF8EE7IFC,11IFE00JF1,1CJF03IFE7,1E3IFC7IF8F,1F9IFEJF3F,1FC7FFEIFC7F,1FF3FFEIF9FF,1FF8FFEFFE3FF,1FFE7FEFFCIF,1IF1FEFF1IF,07FFCFEFE7FFC,03FFE3EF8IF8,00IF9EF3FFE,007FFC6C7FFC,001IF01IF,I0IF83FFE,I03FFC7FF8,I01FFEIF,J07FEFFC,J03FEFF8,K0FEFE,K07EFC,K01EF,L0EE,,^FS'
 head_label_640x550 = f"{logo_zpl_55x55}^FO65,0^GB5,50,5^FS^FO80,0^A0N,40,40^FDMES B8^FS^FO80,35^A0N,20,20^FDManufacturing Execution System B8^FS"
