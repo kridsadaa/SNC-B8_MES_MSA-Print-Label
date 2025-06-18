@@ -141,9 +141,7 @@ def generate_zpl_labels(req: TREQ_PostPrintLabel):
 
     ^FO10,205^A0N,30,30^FDPart^FS
     ^FO10,235^A0N,30,30^FDCode^FS
-    ^FO110,{move_according_to_conditions(req['part_code'], {9: 210, 11: 213, 13: 215}, 210)}
-    ^A0N,{font_size(req['part_code'], {9: "60,60", 11: "50,50", 13: "40,40"})}
-    ^FD{req['part_code']}^FS
+    ^FO110,225^A0N,23,23^FD{req['part_code']}^FS
 
     ^FO360,195^A0N,23,23^FDMat'l^FS
     ^FO460,195^A0N,25,25^FD{req['mat']}^FS
@@ -152,10 +150,7 @@ def generate_zpl_labels(req: TREQ_PostPrintLabel):
 
     ^FO10,305^A0N,30,30^FDPart^FS
     ^FO10,335^A0N,30,30^FDName^FS
-    ^FO110,{move_according_to_conditions(req['part_name'], {10: 310, 12: 313, 14: 315, 16: 317, 18: 319}, 321)}
-    ^A0N,{font_size(req['part_name'], {9: "60,60", 11: "50,50", 13: "40,40", 15: "35,35", 17: "30,30"}, "25,25")}
-    ^FD{req['part_name']}^FS
-
+    ^FO110,325^A0N,23,23^FD{req['part_name']}^FS
 
     ^FO360,295^A0N,23,23^FDProducer^FS
     ^FO460,295^A0N,25,25^FD{req['producer']}^FS
