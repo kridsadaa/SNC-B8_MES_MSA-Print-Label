@@ -1,3 +1,4 @@
+# app/services/print.py
 import os
 from datetime import datetime
 from urllib.parse import urlparse
@@ -64,3 +65,61 @@ def print_label(req: TREQ_PostPrintLabel, printer_port: int = 0):
         return jsonifySuccess(f"Print label {req['code']} successfully", [req])
     except Exception as e:
         return jsonifyError(str(e))
+    
+
+def print_image_from_url(req: dict, printer_port: int = 0):
+    try:
+        if not req:
+            return jsonifyError("No request body received", [], 400)
+        
+        # Extract parameters from request
+        image_url = req.get('image_url', '')
+        width = req.get('width', 190)
+        height = req.get('height', 110)
+        copies = req.get('copies', 1)
+        
+        if not image_url:
+            return jsonifyError("Image URL is required", [], 400)
+        
+        # Validate URL
+        parsed_url = urlparse(image_url)
+        if not parsed_url.scheme:
+            return jsonifyError(f"Invalid URL: {image_url}", [], 400)
+        
+        # Download image with timeout
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+        }
+        response = requests.get(image_url, headers=headers, timeout=30)
+        
+        if response.status_code != 200:
+            return jsonifyError(f"Failed to download image: HTTP {response.status_code}", [], 400)
+        
+        # Create folders
+        folder_date = datetime.now().strftime("%Y-%m-%d")
+        save_folder_image_path = os.path.join("temp", folder_date, "images", "direct")
+        save_folder_zpl_path = os.path.join("temp", folder_date, "zpls", "direct")
+        
+        # Download and convert
+        image_path = download_image_url(image_url, save_folder_image_path)
+        zpl_content = convert_image_to_zpl(image_path, width, height, save_folder_zpl_path)
+        
+        if not zpl_content:
+            return jsonifyError("Failed to convert image to ZPL", [], 400)
+        
+        # Print multiple copies
+        for _ in range(copies):
+            print_images([zpl_content], PRINTER_PORT_LIST[printer_port])
+        
+        return jsonifySuccess("Image printed successfully", [{
+            "image_url": image_url,
+            "printer_port": printer_port,
+            "width": width,
+            "height": height,
+            "copies": copies
+        }])
+        
+    except requests.RequestException as e:
+        return jsonifyError(f"Network error: {str(e)}", [], 400)
+    except Exception as e:
+        return jsonifyError(f"Print error: {str(e)}", [], 500)
