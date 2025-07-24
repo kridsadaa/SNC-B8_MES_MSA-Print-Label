@@ -68,58 +68,82 @@ def print_label(req: TREQ_PostPrintLabel, printer_port: int = 0):
     
 
 def print_image_from_url(req: dict, printer_port: int = 0):
+    """
+    ปริ้นรูปภาพจาก URL - ทำงานคล้าย print_label หลังจากโหลดรูปมาแล้ว
+    """
     try:
         if not req:
             return jsonifyError("No request body received", [], 400)
-        
-        # Extract parameters from request
+       
+        # Extract parameters
         image_url = req.get('image_url', '')
         width = req.get('width', 190)
         height = req.get('height', 110)
         copies = req.get('copies', 1)
-        
+       
         if not image_url:
             return jsonifyError("Image URL is required", [], 400)
-        
+       
+        print(f"🖼️ Print image from URL: {image_url}")
+        print(f"📐 Size: {width}x{height}, Copies: {copies}")
+       
         # Validate URL
         parsed_url = urlparse(image_url)
         if not parsed_url.scheme:
             return jsonifyError(f"Invalid URL: {image_url}", [], 400)
-        
-        # Download image with timeout
+       
+        # Download image (same as print_label)
         headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
         }
+       
+        print(f"🌐 Downloading image...")
         response = requests.get(image_url, headers=headers, timeout=30)
-        
+       
         if response.status_code != 200:
             return jsonifyError(f"Failed to download image: HTTP {response.status_code}", [], 400)
+       
+        print(f"✅ Image downloaded: {len(response.content)} bytes")
+       
+        # ✅ ทำงานต่อคล้าย print_label
+        image_path = None
+       
+        if response.status_code == 200:
+            folder_date = datetime.now().strftime("%Y-%m-%d")
+            save_folder_image_path = os.path.join("temp", folder_date, "images", "parts")
+           
+            # ใช้ download_image_url เหมือน print_label
+            image_path = download_image_url(image_url, save_folder_image_path)
+            print(f"💾 Image saved to: {image_path}")
+       
+        # ✅ เช็คว่ามี image_path และไฟล์มีอยู่จริง
+        if not image_path or not os.path.exists(image_path):
+            return jsonifyError("Failed to save image file", [], 400)
+       
+        # ✅ ปริ้นตามจำนวน copies โดยส่ง list ของ image paths
+        print(f"🖨️ Sending to printer port {printer_port}...")
         
-        # Create folders
-        folder_date = datetime.now().strftime("%Y-%m-%d")
-        save_folder_image_path = os.path.join("temp", folder_date, "images", "direct")
-        save_folder_zpl_path = os.path.join("temp", folder_date, "zpls", "direct")
+        # สร้าง list ของ image paths ตามจำนวน copies
+        image_paths = [image_path] * copies
         
-        # Download and convert
-        image_path = download_image_url(image_url, save_folder_image_path)
-        zpl_content = convert_image_to_zpl(image_path, width, height, save_folder_zpl_path)
+        # เรียก print_images ครั้งเดียวด้วย list ของ paths
+        print_images(image_paths, PRINTER_PORT_LIST[printer_port])
         
-        if not zpl_content:
-            return jsonifyError("Failed to convert image to ZPL", [], 400)
-        
-        # Print multiple copies
-        for _ in range(copies):
-            print_images([zpl_content], PRINTER_PORT_LIST[printer_port])
-        
+        print(f"✅ Successfully sent {copies} copies to printer")
+       
         return jsonifySuccess("Image printed successfully", [{
             "image_url": image_url,
             "printer_port": printer_port,
             "width": width,
             "height": height,
-            "copies": copies
+            "copies": copies,
+            "image_path": image_path,
+            "status": "printed"
         }])
-        
+       
     except requests.RequestException as e:
+        print(f"❌ Network error: {str(e)}")
         return jsonifyError(f"Network error: {str(e)}", [], 400)
     except Exception as e:
+        print(f"❌ Print error: {str(e)}")
         return jsonifyError(f"Print error: {str(e)}", [], 500)
